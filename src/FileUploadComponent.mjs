@@ -1,23 +1,26 @@
 class FileUploadComponent extends HTMLElement {
     constructor() {
-      super();
-      this.attachShadow({ mode: "open" });
-      this.state = {
-        name: "",
-        file: null,
-        progress: 0,
-        status: "Перед загрузкой дайте имя файлу",
-        fileUploaded: false,
-      };
-      this.render();
+        super();
+        this.attachShadow({ mode: "open" });
+        this.state = {
+            name: "",
+            file: null,
+            progress: 0,
+            status: "Перед загрузкой дайте имя файлу",
+            fileUploaded: false,
+        };
+        this.render();
     }
-  
+
     render() {
-      const fileNameText = this.state.name 
-        ? this.state.name + (this.state.file ? '.' + this.state.file.name.split('.').pop() : '')
-        : '';
-  
-      this.shadowRoot.innerHTML = `
+        const fileNameText = this.state.name
+            ? this.state.name +
+              (this.state.file
+                  ? "." + this.state.file.name.split(".").pop()
+                  : "")
+            : "";
+
+        this.shadowRoot.innerHTML = `
         <style>
           :host {
             display: block;
@@ -74,7 +77,7 @@ class FileUploadComponent extends HTMLElement {
             word-wrap: break-word;
           }
           .progress-container {
-            display: ${this.state.progress > 0 ? 'flex' : 'none'};
+            display: ${this.state.progress > 0 ? "flex" : "none"};
             align-items: center;
             justify-content: center;
             width: 100%;
@@ -172,154 +175,174 @@ class FileUploadComponent extends HTMLElement {
         <h2>Загрузочное окно</h2>
         <p id="nameStatus">${this.state.status}</p>
         <div class="input-container">
-          <input type="text" id="name" placeholder="Название файла" value="${this.state.name}" />
+          <input type="text" id="name" placeholder="Название файла" value="${
+              this.state.name
+          }" />
           <span class="clear-btn">✖</span>
         </div>
         <div class="drop-zone" id="dropZone">
           <span>Перенесите ваш файл<br>в область ниже</span>
         </div>
-        <div class="progress-container" id="progressContainer" style="display: ${this.state.progress > 0 ? 'flex' : 'none'};">
+        <div class="progress-container" id="progressContainer" style="display: ${
+            this.state.progress > 0 ? "flex" : "none"
+        };">
           <div class="file-rectangle"></div>
           <div class="progress-bar-container">
             <div class="progress-bar" id="progressBar">
-              <div class="progress-bar-fill" id="progressBarFill" style="width: ${this.state.progress}%"></div>
+              <div class="progress-bar-fill" id="progressBarFill" style="width: ${
+                  this.state.progress
+              }%"></div>
             </div>
           </div>
           <span class="cancel-btn" id="cancelBtn">✖</span>
         </div>
-        <button id="uploadBtn" ${this.state.name && this.state.file ? "" : "disabled"}>Загрузить</button>
+        <button id="uploadBtn" ${
+            this.state.name && this.state.file ? "" : "disabled"
+        }>Загрузить</button>
         <p id="statusMsg"></p>
       `;
-      this.setupEventListeners();
+        this.setupEventListeners();
     }
-  
+
     setupEventListeners() {
-      const nameInput = this.shadowRoot.getElementById("name");
-      const clearBtn = this.shadowRoot.querySelector(".clear-btn");
-      const dropZone = this.shadowRoot.getElementById("dropZone");
-      const uploadBtn = this.shadowRoot.getElementById("uploadBtn");
-      const progressContainer = this.shadowRoot.getElementById("progressContainer");
-      const progressBarFill = this.shadowRoot.getElementById("progressBarFill");
-      const progressText = this.shadowRoot.getElementById("progressText");
-      const cancelBtn = this.shadowRoot.getElementById("cancelBtn");
-      const statusMsg = this.shadowRoot.getElementById("statusMsg");
-      const nameStatus = this.shadowRoot.getElementById("nameStatus");
-      const fileNameElem = this.shadowRoot.getElementById("fileName");
-  
-      clearBtn.addEventListener("click", () => {
-        this.state.name = "";
-        this.state.fileUploaded = false;
-        this.state.progress = 0;
-        this.state.status = "Перед загрузкой дайте имя файлу";
-        this.state.file = null;
-        this.render();
-      });
-  
-      nameInput.addEventListener("input", () => {
-        this.state.name = nameInput.value;
-        this.state.status = this.state.name
-          ? "Перенесите ваш файл в область ниже"
-          : "Перед загрузкой дайте имя файлу";
-        uploadBtn.disabled = !(this.state.name && this.state.file);
-        nameStatus.textContent = this.state.status;
-        fileNameElem.textContent = this.state.name ? this.state.name + (this.state.file ? '.' + this.state.file.name.split('.').pop() : '') : '';
-      });
-  
-      dropZone.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        dropZone.style.borderColor = "#ffffff";
-      });
-  
-      dropZone.addEventListener("dragleave", () => {
-        dropZone.style.borderColor = "rgba(165, 165, 165, 1)";
-      });
-  
-      dropZone.addEventListener("drop", (e) => {
-        e.preventDefault();
-        this.state.file = e.dataTransfer.files[0];
-        if (this.state.file) {
-          this.startUpload(this.state.file);
-        }
-      });
-  
-      dropZone.addEventListener("click", () => {
-        const fileInput = document.createElement("input");
-        fileInput.type = "file";
-        fileInput.addEventListener("change", () => {
-          this.state.file = fileInput.files[0];
-          if (this.state.file) {
-            this.startUpload(this.state.file);
-          }
-        });
-        fileInput.click();
-      });
-  
-      cancelBtn.addEventListener("click", () => {
-        this.state.file = null;
-        this.state.progress = 0;
-        this.state.status = "Перенесите ваш файл в область ниже";
-        this.state.fileUploaded = false;
-        this.render();
-      });
-  
-      uploadBtn.addEventListener("click", async () => {
-        if (!this.state.file || !this.state.name) return;
-        statusMsg.textContent = "Загрузка...";
-  
-        const formData = new FormData();
-        formData.append("file", this.state.file);
-        formData.append("name", this.state.name);
-  
-        try {
-          const response = await fetch("https://file-upload-server-mc26.onrender.com/api/v1/upload", {
-            method: "POST",
-            body: formData,
-          });
-          const result = await response.json();
-          if (response.ok) {
-            statusMsg.textContent = `Файл успешно загружен: ${result.message}`;
-            this.state.fileUploaded = true;
-            this.state.status = "Загрузите ваш файл";
-            uploadBtn.disabled = true;
+        const nameInput = this.shadowRoot.getElementById("name");
+        const clearBtn = this.shadowRoot.querySelector(".clear-btn");
+        const dropZone = this.shadowRoot.getElementById("dropZone");
+        const uploadBtn = this.shadowRoot.getElementById("uploadBtn");
+        const progressContainer =
+            this.shadowRoot.getElementById("progressContainer");
+        const progressBarFill =
+            this.shadowRoot.getElementById("progressBarFill");
+        const progressText = this.shadowRoot.getElementById("progressText");
+        const cancelBtn = this.shadowRoot.getElementById("cancelBtn");
+        const statusMsg = this.shadowRoot.getElementById("statusMsg");
+        const nameStatus = this.shadowRoot.getElementById("nameStatus");
+        const fileNameElem = this.shadowRoot.getElementById("fileName");
+
+        clearBtn.addEventListener("click", () => {
+            this.state.name = "";
+            this.state.fileUploaded = false;
+            this.state.progress = 0;
+            this.state.status = "Перед загрузкой дайте имя файлу";
+            this.state.file = null;
             this.render();
-          } else {
-            statusMsg.textContent = `Ошибка загрузки: ${result.error}`;
-          }
-        } catch (error) {
-          statusMsg.textContent = "Ошибка сервера. Попробуйте снова.";
-        }
-      });
+        });
+
+        nameInput.addEventListener("input", () => {
+            this.state.name = nameInput.value;
+            this.state.status = this.state.name
+                ? "Перенесите ваш файл в область ниже"
+                : "Перед загрузкой дайте имя файлу";
+            uploadBtn.disabled = !(this.state.name && this.state.file);
+            nameStatus.textContent = this.state.status;
+            fileNameElem.textContent = this.state.name
+                ? this.state.name +
+                  (this.state.file
+                      ? "." + this.state.file.name.split(".").pop()
+                      : "")
+                : "";
+        });
+
+        dropZone.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = "#ffffff";
+        });
+
+        dropZone.addEventListener("dragleave", () => {
+            dropZone.style.borderColor = "rgba(165, 165, 165, 1)";
+        });
+
+        dropZone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            this.state.file = e.dataTransfer.files[0];
+            if (this.state.file) {
+                this.startUpload(this.state.file);
+            }
+        });
+
+        dropZone.addEventListener("click", () => {
+            const fileInput = document.createElement("input");
+            fileInput.type = "file";
+            fileInput.addEventListener("change", () => {
+                this.state.file = fileInput.files[0];
+                if (this.state.file) {
+                    this.startUpload(this.state.file);
+                }
+            });
+            fileInput.click();
+        });
+
+        cancelBtn.addEventListener("click", () => {
+            this.state.file = null;
+            this.state.progress = 0;
+            this.state.status = "Перенесите ваш файл в область ниже";
+            this.state.fileUploaded = false;
+            this.render();
+        });
+
+        uploadBtn.addEventListener("click", async () => {
+            if (!this.state.file || !this.state.name) return;
+            statusMsg.textContent = "Загрузка...";
+
+            const formData = new FormData();
+            formData.append("file", this.state.file);
+            formData.append("name", this.state.name);
+
+            try {
+                const response = await fetch(
+                    "https://file-upload-server-mc26.onrender.com/api/v1/upload",
+                    {
+                        method: "POST",
+                        body: formData,
+                    }
+                );
+                const result = await response.json();
+                if (response.ok) {
+                    statusMsg.textContent = `Файл успешно загружен: ${result.message}`;
+                    this.state.fileUploaded = true;
+                    this.state.status = "Загрузите ваш файл";
+                    uploadBtn.disabled = true;
+                    this.render();
+                } else {
+                    statusMsg.textContent = `Ошибка загрузки: ${result.error}`;
+                }
+            } catch (error) {
+                statusMsg.textContent = "Ошибка сервера. Попробуйте снова.";
+            }
+        });
     }
-  
+
     startUpload(file) {
-      const progressContainer = this.shadowRoot.getElementById("progressContainer");
-      const progressBarFill = this.shadowRoot.getElementById("progressBarFill");
-      const progressText = this.shadowRoot.getElementById("progressText");
-      const uploadBtn = this.shadowRoot.getElementById("uploadBtn");
-  
-      progressContainer.style.display = "flex";
-      let progress = 0;
-  
-      const interval = setInterval(() => {
-        if (progress >= 100) {
-          progress = 100;
-          clearInterval(interval);
-          uploadBtn.disabled = false;
-          this.state.status = "Загрузите ваш файл";
-          this.render();
-          return;
-        }
-  
-        const increment = Math.floor(Math.random() * (25 - 10 + 1)) + 10;
-        progress += increment;
-        if (progress > 100) {
-          progress = 100;
-        }
-        this.state.progress = progress;
-        progressBarFill.style.width = `${progress}%`;
-        progressText.textContent = `${progress}%`;
-      }, 300);
+        const progressContainer =
+            this.shadowRoot.getElementById("progressContainer");
+        const progressBarFill =
+            this.shadowRoot.getElementById("progressBarFill");
+        const progressText = this.shadowRoot.getElementById("progressText");
+        const uploadBtn = this.shadowRoot.getElementById("uploadBtn");
+
+        progressContainer.style.display = "flex";
+        let progress = 0;
+
+        const interval = setInterval(() => {
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(interval);
+                uploadBtn.disabled = false;
+                this.state.status = "Загрузите ваш файл";
+                this.render();
+                return;
+            }
+
+            const increment = Math.floor(Math.random() * (25 - 10 + 1)) + 10;
+            progress += increment;
+            if (progress > 100) {
+                progress = 100;
+            }
+            this.state.progress = progress;
+            progressBarFill.style.width = `${progress}%`;
+            progressText.textContent = `${progress}%`;
+        }, 300);
     }
-  }
-  
-  customElements.define("file-upload", FileUploadComponent);
+}
+
+customElements.define("file-upload", FileUploadComponent);
