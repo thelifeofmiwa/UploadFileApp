@@ -13,6 +13,10 @@ class FileUploadComponent extends HTMLElement {
     }
   
     render() {
+      const fileNameText = this.state.name 
+        ? this.state.name + (this.state.file ? '.' + this.state.file.name.split('.').pop() : '')
+        : '';
+  
       this.shadowRoot.innerHTML = `
         <style>
           :host {
@@ -70,24 +74,84 @@ class FileUploadComponent extends HTMLElement {
             word-wrap: break-word;
           }
           .progress-container {
+            display: ${this.state.progress > 0 ? 'flex' : 'none'};
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 50px;
+            background-color: rgba(241, 241, 241, 1);
+            padding: 5px 10px;
+            box-sizing: border-box;
+            border-radius: 20px;
+            border: 1px solid rgba(165, 165, 165, 1);
+            margin-top: 10px;
+            position: relative;
+          }
+          .progress-bar-container {
             display: flex;
             align-items: center;
-            margin-top: 10px;
+            width: 80%; /* Уменьшаем контейнер прогресса */
+            justify-content: center;
           }
           .progress-bar {
             flex-grow: 1;
-            height: 5px;
-            background: #6a5acd;
+            height: 10px;
+            background-color: white;
             border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+            margin-right: 10px;
           }
-          .progress-text {
-            margin-left: 10px;
-            color: white;
+          .progress-bar-fill {
+            height: 100%;
+            background: #6a5acd;
+            transition: width 0.3s ease-in-out;
+            width: ${this.state.progress}%;
           }
           .cancel-btn {
-            margin-left: 10px;
             cursor: pointer;
-            color: white;
+            color: rgba(95, 92, 240, 1);
+            font-size: 18px;
+            position: absolute;
+            right: 10px; /* Крестик справа */
+            top: 50%;
+            transform: translateY(-50%);
+          }
+          .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px; /* Уменьшаем шрифт прогресса */
+            color: rgba(95, 92, 240, 1);
+            margin-bottom: 5px;
+            position: absolute;
+            top: -20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+          }
+          .progress-text {
+            font-size: 12px; /* Уменьшаем шрифт прогресса */
+            font-weight: bold;
+          }
+          .file-name {
+            font-size: 12px; /* Уменьшаем шрифт названия файла */
+            color: #6a5acd;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+          .progress-text, .file-name {
+            max-width: 100px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+          .file-rectangle {
+            width: 30px; /* Увеличиваем размер прямоугольника */
+            height: 30px; /* Увеличиваем размер прямоугольника */
+            background-color: #6a5acd;
+            border-radius: 5px;
+            margin-right: 10px;
           }
           button {
             width: 100%;
@@ -114,12 +178,16 @@ class FileUploadComponent extends HTMLElement {
         <div class="drop-zone" id="dropZone">
           <span>Перенесите ваш файл<br>в область ниже</span>
         </div>
-        <div class="progress-container" id="progressContainer" style="display: none;">
-          <div class="progress-bar" id="progressBar" style="width: ${this.state.progress}%"></div>
-          <span class="progress-text" id="progressText">${this.state.progress}%</span>
+        <div class="progress-container" id="progressContainer" style="display: ${this.state.progress > 0 ? 'flex' : 'none'};">
+          <div class="file-rectangle"></div>
+          <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar">
+              <div class="progress-bar-fill" id="progressBarFill" style="width: ${this.state.progress}%"></div>
+            </div>
+          </div>
           <span class="cancel-btn" id="cancelBtn">✖</span>
         </div>
-        <button id="uploadBtn" ${this.state.fileUploaded ? "disabled" : ""}>Загрузить</button>
+        <button id="uploadBtn" ${this.state.name && this.state.file ? "" : "disabled"}>Загрузить</button>
         <p id="statusMsg"></p>
       `;
       this.setupEventListeners();
@@ -131,11 +199,12 @@ class FileUploadComponent extends HTMLElement {
       const dropZone = this.shadowRoot.getElementById("dropZone");
       const uploadBtn = this.shadowRoot.getElementById("uploadBtn");
       const progressContainer = this.shadowRoot.getElementById("progressContainer");
-      const progressBar = this.shadowRoot.getElementById("progressBar");
+      const progressBarFill = this.shadowRoot.getElementById("progressBarFill");
       const progressText = this.shadowRoot.getElementById("progressText");
       const cancelBtn = this.shadowRoot.getElementById("cancelBtn");
       const statusMsg = this.shadowRoot.getElementById("statusMsg");
       const nameStatus = this.shadowRoot.getElementById("nameStatus");
+      const fileNameElem = this.shadowRoot.getElementById("fileName");
   
       clearBtn.addEventListener("click", () => {
         this.state.name = "";
@@ -153,6 +222,7 @@ class FileUploadComponent extends HTMLElement {
           : "Перед загрузкой дайте имя файлу";
         uploadBtn.disabled = !(this.state.name && this.state.file);
         nameStatus.textContent = this.state.status;
+        fileNameElem.textContent = this.state.name ? this.state.name + (this.state.file ? '.' + this.state.file.name.split('.').pop() : '') : '';
       });
   
       dropZone.addEventListener("dragover", (e) => {
@@ -201,14 +271,10 @@ class FileUploadComponent extends HTMLElement {
         formData.append("name", this.state.name);
   
         try {
-          const response = await fetch(
-            "https://file-upload-server-mc26.onrender.com/api/v1/upload",
-            {
-              method: "POST",
-              body: formData,
-            }
-          );
-  
+          const response = await fetch("https://file-upload-server-mc26.onrender.com/api/v1/upload", {
+            method: "POST",
+            body: formData,
+          });
           const result = await response.json();
           if (response.ok) {
             statusMsg.textContent = `Файл успешно загружен: ${result.message}`;
@@ -227,27 +293,33 @@ class FileUploadComponent extends HTMLElement {
   
     startUpload(file) {
       const progressContainer = this.shadowRoot.getElementById("progressContainer");
-      const progressBar = this.shadowRoot.getElementById("progressBar");
+      const progressBarFill = this.shadowRoot.getElementById("progressBarFill");
       const progressText = this.shadowRoot.getElementById("progressText");
       const uploadBtn = this.shadowRoot.getElementById("uploadBtn");
   
       progressContainer.style.display = "flex";
       let progress = 0;
+  
       const interval = setInterval(() => {
         if (progress >= 100) {
+          progress = 100;
           clearInterval(interval);
           uploadBtn.disabled = false;
           this.state.status = "Загрузите ваш файл";
           this.render();
-        } else {
-          progress += 10;
-          this.state.progress = progress;
-          progressBar.style.width = `${progress}%`;
-          progressText.textContent = `${progress}%`;
+          return;
         }
-      }, 500);
+  
+        const increment = Math.floor(Math.random() * (25 - 10 + 1)) + 10;
+        progress += increment;
+        if (progress > 100) {
+          progress = 100;
+        }
+        this.state.progress = progress;
+        progressBarFill.style.width = `${progress}%`;
+        progressText.textContent = `${progress}%`;
+      }, 300);
     }
   }
   
   customElements.define("file-upload", FileUploadComponent);
-  
