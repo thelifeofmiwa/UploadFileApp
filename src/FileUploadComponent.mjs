@@ -21,186 +21,186 @@ class FileUploadComponent extends HTMLElement {
             : "";
 
         this.shadowRoot.innerHTML = `
-        <style>
-          :host {
-            display: block;
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            border-radius: 10px;
-            width: 350px;
-            background: linear-gradient(to bottom, #6a5acd, #ffffff);
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
-            position: relative;
-          }
-          h2 {
-            color: white;
-            text-align: center;
-          }
-          .input-container {
-            position: relative;
-            display: flex;
-            align-items: center;
-          }
-          input {
-            width: 100%;
-            padding: 8px;
-            font-size: 14px;
-            border: none;
-            border-radius: 5px;
-            background: white;
-            color: #6a5acd;
-          }
-          .clear-btn {
-            position: absolute;
-            right: 10px;
-            cursor: pointer;
-            color: #6a5acd;
-          }
-          .drop-zone {
-            border: 2px solid rgba(165, 165, 165, 1);
-            text-align: center;
-            padding: 20px;
-            margin-top: 10px;
-            cursor: pointer;
-            color: rgba(95, 92, 240, 1);
-            width: 300px;
-            height: 300px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 20px;
-            font-size: 16px;
-            background-color: rgba(255, 255, 255, 0.3);
-          }
-          .drop-zone span {
-            white-space: normal;
-            word-wrap: break-word;
-          }
-          .progress-container {
-            display: ${this.state.progress > 0 ? "flex" : "none"};
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 50px;
-            background-color: rgba(241, 241, 241, 1);
-            padding: 5px 10px;
-            box-sizing: border-box;
-            border-radius: 20px;
-            border: 1px solid rgba(165, 165, 165, 1);
-            margin-top: 10px;
-            position: relative;
-          }
-          .progress-bar-container {
-            display: flex;
-            align-items: center;
-            width: 80%; /* Уменьшаем контейнер прогресса */
-            justify-content: center;
-          }
-          .progress-bar {
-            flex-grow: 1;
-            height: 10px;
-            background-color: white;
-            border-radius: 5px;
-            overflow: hidden;
-            position: relative;
-            margin-right: 10px;
-          }
-          .progress-bar-fill {
-            height: 100%;
-            background: #6a5acd;
-            transition: width 0.3s ease-in-out;
-            width: ${this.state.progress}%;
-          }
-          .cancel-btn {
-            cursor: pointer;
-            color: rgba(95, 92, 240, 1);
-            font-size: 18px;
-            position: absolute;
-            right: 10px; /* Крестик справа */
-            top: 50%;
-            transform: translateY(-50%);
-          }
-          .progress-info {
-            display: flex;
-            justify-content: space-between;
-            font-size: 10px; /* Уменьшаем шрифт прогресса */
-            color: rgba(95, 92, 240, 1);
-            margin-bottom: 5px;
-            position: absolute;
-            top: -20px;
-            left: 0;
-            right: 0;
-            text-align: center;
-          }
-          .progress-text {
-            font-size: 12px; /* Уменьшаем шрифт прогресса */
-            font-weight: bold;
-          }
-          .file-name {
-            font-size: 12px; /* Уменьшаем шрифт названия файла */
-            color: #6a5acd;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-          }
-          .progress-text, .file-name {
-            max-width: 100px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-          }
-          .file-rectangle {
-            width: 30px; /* Увеличиваем размер прямоугольника */
-            height: 30px; /* Увеличиваем размер прямоугольника */
-            background-color: #6a5acd;
-            border-radius: 5px;
-            margin-right: 10px;
-          }
-          button {
-            width: 100%;
-            margin-top: 10px;
-            padding: 10px;
-            font-size: 16px;
-            background-color: #6a5acd;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-          }
-          button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-          }
-        </style>
-        <h2>Загрузочное окно</h2>
-        <p id="nameStatus">${this.state.status}</p>
-        <div class="input-container">
-          <input type="text" id="name" placeholder="Название файла" value="${
-              this.state.name
-          }" />
-          <span class="clear-btn">✖</span>
-        </div>
-        <div class="drop-zone" id="dropZone">
-          <span>Перенесите ваш файл<br>в область ниже</span>
-        </div>
-        <div class="progress-container" id="progressContainer" style="display: ${
-            this.state.progress > 0 ? "flex" : "none"
-        };">
-          <div class="file-rectangle"></div>
-          <div class="progress-bar-container">
-            <div class="progress-bar" id="progressBar">
-              <div class="progress-bar-fill" id="progressBarFill" style="width: ${
-                  this.state.progress
-              }%"></div>
-            </div>
+      <style>
+        :host {
+          display: block;
+          font-family: Arial, sans-serif;
+          padding: 20px;
+          border-radius: 10px;
+          width: 350px;
+          background: linear-gradient(to bottom, #6a5acd, #ffffff);
+          box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+          position: relative;
+        }
+        h2 {
+          color: white;
+          text-align: center;
+        }
+        .input-container {
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+        input {
+          width: 100%;
+          padding: 8px;
+          font-size: 14px;
+          border: none;
+          border-radius: 5px;
+          background: white;
+          color: #6a5acd;
+        }
+        .clear-btn {
+          position: absolute;
+          right: 10px;
+          cursor: pointer;
+          color: #6a5acd;
+        }
+        .drop-zone {
+          border: 2px solid rgba(165, 165, 165, 1);
+          text-align: center;
+          padding: 20px;
+          margin-top: 10px;
+          cursor: pointer;
+          color: rgba(95, 92, 240, 1);
+          width: 300px;
+          height: 300px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          border-radius: 20px;
+          font-size: 16px;
+          background-color: rgba(255, 255, 255, 0.3);
+        }
+        .drop-zone span {
+          white-space: normal;
+          word-wrap: break-word;
+        }
+        .progress-container {
+          display: ${this.state.progress > 0 ? "flex" : "none"};
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          height: 50px;
+          background-color: rgba(241, 241, 241, 1);
+          padding: 5px 10px;
+          box-sizing: border-box;
+          border-radius: 20px;
+          border: 1px solid rgba(165, 165, 165, 1);
+          margin-top: 10px;
+          position: relative;
+        }
+        .progress-bar-container {
+          display: flex;
+          align-items: center;
+          width: 80%;
+          justify-content: center;
+        }
+        .progress-bar {
+          flex-grow: 1;
+          height: 10px;
+          background-color: white;
+          border-radius: 5px;
+          overflow: hidden;
+          position: relative;
+          margin-right: 10px;
+        }
+        .progress-bar-fill {
+          height: 100%;
+          background: #6a5acd;
+          transition: width 0.3s ease-in-out;
+          width: ${this.state.progress}%;
+        }
+        .cancel-btn {
+          cursor: pointer;
+          color: rgba(95, 92, 240, 1);
+          font-size: 18px;
+          position: absolute;
+          right: 10px;
+          top: 50%;
+          transform: translateY(-50%);
+        }
+        .progress-info {
+          display: flex;
+          justify-content: space-between;
+          font-size: 10px;
+          color: rgba(95, 92, 240, 1);
+          margin-bottom: 5px;
+          position: absolute;
+          top: -20px;
+          left: 0;
+          right: 0;
+          text-align: center;
+        }
+        .progress-text {
+          font-size: 12px;
+          font-weight: bold;
+        }
+        .file-name {
+          font-size: 12px;
+          color: #6a5acd;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .progress-text, .file-name {
+          max-width: 100px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .file-rectangle {
+          width: 30px;
+          height: 30px;
+          background-color: #6a5acd;
+          border-radius: 5px;
+          margin-right: 10px;
+        }
+        button {
+          width: 100%;
+          margin-top: 10px;
+          padding: 10px;
+          font-size: 16px;
+          background-color: #6a5acd;
+          color: white;
+          border: none;
+          cursor: pointer;
+          border-radius: 5px;
+        }
+        button:disabled {
+          background-color: #cccccc;
+          cursor: not-allowed;
+        }
+      </style>
+      <h2>Загрузочное окно</h2>
+      <p id="nameStatus">${this.state.status}</p>
+      <div class="input-container">
+        <input type="text" id="name" placeholder="Название файла" value="${
+            this.state.name
+        }" />
+        <span class="clear-btn">✖</span>
+      </div>
+      <div class="drop-zone" id="dropZone">
+        <span>Перенесите ваш файл<br>в область ниже</span>
+      </div>
+      <div class="progress-container" id="progressContainer" style="display: ${
+          this.state.progress > 0 ? "flex" : "none"
+      };">
+        <div class="file-rectangle"></div>
+        <div class="progress-bar-container">
+          <div class="progress-bar" id="progressBar">
+            <div class="progress-bar-fill" id="progressBarFill" style="width: ${
+                this.state.progress
+            }%"></div>
           </div>
-          <span class="cancel-btn" id="cancelBtn">✖</span>
         </div>
-        <button id="uploadBtn" ${
-            this.state.name && this.state.file ? "" : "disabled"
-        }>Загрузить</button>
-        <p id="statusMsg"></p>
-      `;
+        <span class="cancel-btn" id="cancelBtn">✖</span>
+      </div>
+      <button id="uploadBtn" ${
+          this.state.name && this.state.file ? "" : "disabled"
+      }>Загрузить</button>
+      <p id="statusMsg"></p>
+    `;
         this.setupEventListeners();
     }
 
